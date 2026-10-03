@@ -1,0 +1,40 @@
+name: Validate catalog
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  # The catalog points at other repositories' default branches, so a rename or
+  # a moved plugin.json upstream breaks installs here without any commit to
+  # this repo. A weekly run catches that before a user does.
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions: {}
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '22'
+
+      - name: Every entry resolves to a plugin with a matching name
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/validate-catalog.mjs
+
+      - name: Claude Code accepts the manifest
+        run: npx --yes @anthropic-ai/claude-code plugin validate --strict .

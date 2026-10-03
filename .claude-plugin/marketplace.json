@@ -1,0 +1,51 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "quintinbotes",
+  "description": "Claude Code plugins by Quintin Botes: code review, debugging discipline, and agent orchestration.",
+  "owner": {
+    "name": "Quintin Botes",
+    "url": "https://github.com/QuintinBotes"
+  },
+  "plugins": [
+    {
+      "name": "review-voice",
+      "source": {
+        "source": "git-subdir",
+        "url": "QuintinBotes/review-voice",
+        "path": "plugins/review-voice"
+      },
+      "description": "A concise, precedent-aware code reviewer that calibrates to your review judgment. Every finding names a concrete failure mode in 40 words or fewer, ordered worst-first, evidence required, silence when nothing qualifies.",
+      "category": "development",
+      "tags": ["code-review", "git", "github", "quality", "local-first"],
+      "homepage": "https://github.com/QuintinBotes/review-voice",
+      "repository": "https://github.com/QuintinBotes/review-voice",
+      "license": "MIT"
+    },
+    {
+      "name": "circuit-breaker",
+      "source": {
+        "source": "github",
+        "repo": "QuintinBotes/circuit-breaker"
+      },
+      "description": "Investigation, mutation, refutation and verification as states a hook enforces, rather than instructions a model is asked to follow.",
+      "category": "development",
+      "tags": ["debugging", "verification", "hooks", "state-machine"],
+      "homepage": "https://github.com/QuintinBotes/circuit-breaker",
+      "repository": "https://github.com/QuintinBotes/circuit-breaker",
+      "license": "MIT"
+    },
+    {
+      "name": "swarm",
+      "source": {
+        "source": "github",
+        "repo": "QuintinBotes/swarm"
+      },
+      "description": "Parallel agent orchestrator: author a spec, decompose it into exclusive-ownership tasks, execute them across isolated git worktrees, and gate the merge on QA and review.",
+      "category": "development",
+      "tags": ["orchestration", "multi-agent", "worktree", "spec-driven-development"],
+      "homepage": "https://github.com/QuintinBotes/swarm",
+      "repository": "https://github.com/QuintinBotes/swarm",
+      "license": "MIT"
+    }
+  ]
+}
