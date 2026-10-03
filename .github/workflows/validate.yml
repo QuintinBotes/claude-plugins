@@ -31,6 +31,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: In-repo plugin tests
+        run: node --test plugins/*/test/*.test.mjs
+
       - name: Every entry resolves to a plugin with a matching name
         env:
           GITHUB_TOKEN: ${{ github.token }}

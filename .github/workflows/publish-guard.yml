@@ -1,0 +1,116 @@
+name: Publish guard (reusable)
+
+# Fails when a push, pull request, issue or comment puts a private term or a
+# non-allowed email into a repository. The scanner is plugins/publish-guard
+# from this repository, checked out at the same commit the caller pinned this
+# workflow to, so a caller that pins a SHA also pins the scanner.
+#
+# Caller (see plugins/publish-guard/README.md):
+#
+#   jobs:
+#     guard:
+#       permissions:
+#         contents: read
+#       uses: QuintinBotes/claude-plugins/.github/workflows/publish-guard.yml@<sha>
+#       with:
+#         allowed-emails: you@personal.example
+#       secrets:
+#         PUBLISH_GUARD_TERMS: ${{ secrets.PUBLISH_GUARD_TERMS }}
+
+on:
+  workflow_call:
+    inputs:
+      allowed-emails:
+        description: Addresses allowed in commit identities and trailers, separated by commas or newlines. GitHub noreply addresses are always allowed.
+        type: string
+        required: false
+        default: ''
+      allowed-email-patterns:
+        description: Extra regular expressions (one per line) for allowed addresses.
+        type: string
+        required: false
+        default: ''
+      scanner-ref:
+        description: Commit or ref of the scanner to run. Empty means the commit this workflow was called at (job.workflow_sha).
+        type: string
+        required: false
+        default: ''
+    secrets:
+      PUBLISH_GUARD_TERMS:
+        description: The contents of terms.txt. Fork pull requests never receive it; those runs check email identities only.
+        required: false
+
+permissions: {}
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository being guarded
+        if: github.event_name == 'push' || startsWith(github.event_name, 'pull_request')
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          path: target
+
+      # job.workflow_repository and job.workflow_sha name this reusable
+      # workflow's own repository and commit (github.workflow_* name the
+      # caller's). They are missing on GitHub Enterprise Server, where the
+      # fallbacks apply and scanner-ref should be set.
+      - name: Check out the scanner at the commit this workflow was called at
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          repository: ${{ job.workflow_repository || 'QuintinBotes/claude-plugins' }}
+          ref: ${{ inputs.scanner-ref || job.workflow_sha }}
+          persist-credentials: false
+          path: .publish-guard
+          sparse-checkout: plugins/publish-guard
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: '22'
+
+      # The secret goes to a file only this user can read, never to the
+      # environment of the scan step or to the log.
+      - name: Write the terms to a private file
+        env:
+          PUBLISH_GUARD_TERMS: ${{ secrets.PUBLISH_GUARD_TERMS }}
+        run: |
+          if [ -z "${PUBLISH_GUARD_TERMS}" ]; then
+            echo "PUBLISH_GUARD_TERMS is not available to this run; terms will not be checked."
+            exit 0
+          fi
+          umask 077
+          dir="${RUNNER_TEMP}/publish-guard"
+          mkdir -p "${dir}"
+          printf '%s\n' "${PUBLISH_GUARD_TERMS}" > "${dir}/terms.txt"
+          chmod 600 "${dir}/terms.txt"
+          echo "GUARD_TERMS_FILE=${dir}/terms.txt" >> "${GITHUB_ENV}"
+
+      # Event text is attacker-controlled (titles, bodies, comments), so it
+      # reaches the scanner through env vars only. Interpolating it into the
+      # script would be a shell injection.
+      - name: Scan
+        env:
+          GUARD_EVENT: ${{ github.event_name }}
+          GUARD_ALLOWED_EMAILS: ${{ inputs.allowed-emails }}
+          GUARD_ALLOWED_EMAIL_PATTERNS: ${{ inputs.allowed-email-patterns }}
+          GUARD_REF: ${{ github.ref }}
+          GUARD_BEFORE: ${{ github.event.before }}
+          GUARD_AFTER: ${{ github.event.after }}
+          GUARD_PR_BASE: ${{ github.event.pull_request.base.sha }}
+          GUARD_PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          GUARD_PR_TITLE: ${{ github.event.pull_request.title }}
+          GUARD_PR_BODY: ${{ github.event.pull_request.body }}
+          GUARD_PR_ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          GUARD_ISSUE_TITLE: ${{ github.event.issue.title }}
+          GUARD_ISSUE_BODY: ${{ github.event.issue.body }}
+          GUARD_ISSUE_ASSOCIATION: ${{ github.event.issue.author_association }}
+          GUARD_COMMENT_BODY: ${{ github.event.comment.body }}
+          GUARD_COMMENT_ASSOCIATION: ${{ github.event.comment.author_association }}
+          GUARD_REVIEW_BODY: ${{ github.event.review.body }}
+          GUARD_REVIEW_ASSOCIATION: ${{ github.event.review.author_association }}
+        run: node .publish-guard/plugins/publish-guard/bin/publish-guard ci target

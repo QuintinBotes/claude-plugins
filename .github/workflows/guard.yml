@@ -1,0 +1,36 @@
+name: Publish guard
+
+# Runs the reusable publish-guard workflow on this repository. It calls the
+# local copy so a change to the scanner is checked by the scanner it ships.
+# The PUBLISH_GUARD_TERMS secret holds the private terms list:
+#   gh secret set PUBLISH_GUARD_TERMS < ~/.config/publish-guard/terms.txt
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main]
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review:
+    types: [submitted, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+
+permissions: {}
+
+# No concurrency group: cancelling a run would leave the text of an earlier
+# comment or edit unchecked.
+
+jobs:
+  guard:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/publish-guard.yml
+    with:
+      allowed-emails: quintinbotes@outlook.com
+      allowed-email-patterns: '^noreply@anthropic\.com$'
+    secrets:
+      PUBLISH_GUARD_TERMS: ${{ secrets.PUBLISH_GUARD_TERMS }}

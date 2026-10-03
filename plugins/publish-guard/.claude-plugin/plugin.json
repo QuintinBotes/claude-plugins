@@ -1,0 +1,13 @@
+{
+  "name": "publish-guard",
+  "version": "0.1.0",
+  "description": "Blocks commits, pushes, pull requests, issues, releases and GitHub API calls that would put private terms or a non-allowed email into repositories of protected GitHub owners. One scanner runs as a Claude Code hook, as git hooks and in CI.",
+  "author": {
+    "name": "Quintin Botes",
+    "url": "https://github.com/QuintinBotes"
+  },
+  "homepage": "https://github.com/QuintinBotes/claude-plugins/tree/main/plugins/publish-guard",
+  "repository": "https://github.com/QuintinBotes/claude-plugins",
+  "license": "MIT",
+  "keywords": ["privacy", "git", "github", "hooks", "pre-commit", "pre-push", "ci"]
+}

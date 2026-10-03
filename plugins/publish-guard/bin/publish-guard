@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+// Extensionless so it reads as a command. Node treats a file with no
+// extension as CommonJS, so the ESM code lives in lib/ and loads through a
+// dynamic import, which CommonJS allows.
+'use strict';
+
+const args = process.argv.slice(2);
+
+import('../lib/cli.mjs')
+  .then(({ main }) => main(args))
+  .then((code) => {
+    process.exitCode = code;
+  })
+  .catch(() => {
+    process.stderr.write('publish-guard: failed to start\n');
+    if (args[0] === 'hook' && args[1] === 'claude') {
+      // A broken install must not let publishing through unchecked, but it
+      // must not block every other Bash call either.
+      let raw = '';
+      try {
+        raw = require('node:fs').readFileSync(0, 'utf8');
+      } catch {}
+      if (/\b(git|gh)\b|"mcp__[^"]*github/i.test(raw)) {
+        process.stdout.write(
+          JSON.stringify({
+            hookSpecificOutput: {
+              hookEventName: 'PreToolUse',
+              permissionDecision: 'deny',
+              permissionDecisionReason: 'publish-guard is installed but failed to start, so git, gh and GitHub calls are blocked. Reinstall or update the plugin.',
+            },
+          }) + '\n',
+        );
+      }
+      process.exitCode = 0;
+      return;
+    }
+    process.exitCode = 2;
+  });
