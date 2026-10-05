@@ -18,9 +18,17 @@ publish-guard checks all of those, at three layers, with one scanner.
 - **Private terms.** A list you keep outside every repository
   (`~/.config/publish-guard/terms.txt`). One term per line, matched
   case-insensitively as a substring; lines starting with `re:` are regular
-  expressions. Text is also matched as a reader sees it: a term wrapped onto
-  the next line, written with a Unicode dash, or split by a zero-width
-  character still counts.
+  expressions, used as written. A term made of several alphanumeric tokens
+  (`/Users/jdoe`, `acme corp`) also matches those tokens in order with any run
+  of up to three other characters between them, or none, so a path rewritten
+  as a slug (`-Users-jdoe-Projects-x-`), `Users_jdoe`, `users.jdoe` and
+  `usersjdoe` all match. Those looser spellings must stand alone: a letter or
+  digit touching either end of the match (`tab.cdefg` for the term `ab cdef`)
+  rules it out, which keeps short tokens from joining inside longer words. The
+  exact text still matches anywhere, and a term of one token is a plain
+  substring. Text is also matched as a reader sees it: a term wrapped onto the
+  next line, written with a Unicode dash, or split by a zero-width character
+  still counts.
 - **Email identities.** Every author, committer and tagger address, and every
   address in a trailer such as `Co-authored-by:` or `Signed-off-by:`, must be in
   `allowed_emails` or match `allowed_email_patterns`. Addresses in file content
@@ -234,9 +242,11 @@ git config publish-guard.protect true
   the owner from the current repository; GraphQL queries are reads and pass.
 - GitHub MCP tools cannot set the author email of a merge; the account setting
   in step 6 covers that.
-- Terms are matched as text. A different spelling (`acmeinternal`,
-  `acme internal`) defeats the check unless it is listed too. Add variants as
-  extra terms or a `re:` line.
+- Terms are matched as text. A term of several tokens survives a change of
+  separator (`acme internal`, `acme_internal`, `acmeinternal`), but a
+  one-token term (`AcmeWidget`) does not match `acme-widget`, and a variant
+  glued into a longer word (`isAcmeInternalFlag`) is not caught by the looser
+  rule. Add such spellings as extra terms or a `re:` line.
 - The CI layer reports after the fact for issues and comments; it cannot stop
   them from being posted, only make the leak visible so you can edit it.
 

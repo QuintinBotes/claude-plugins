@@ -16,9 +16,41 @@ function escapeRe(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// Terms file format: one term per line, case-insensitive substring. Lines
+// Longest run of non-alphanumeric characters allowed between two tokens of a
+// multi-token term. Three covers a slug or path separator, markdown emphasis
+// ("**acme** corp") and ": ", while an unrelated sentence break or list
+// punctuation rarely reaches it. A term written with a longer run of its own
+// still matches that run.
+const MAX_GAP = 3;
+
+// The pattern for a literal term. A term of one alphanumeric token is the
+// plain case-insensitive substring. A term of several tokens ("/Users/jdoe",
+// "acme corp") keeps that exact substring match and also matches its tokens
+// in order with up to MAX_GAP non-alphanumeric characters, including none,
+// between them, so a path rewritten as a slug ("-Users-jdoe-"), "users_jdoe"
+// and "usersjdoe" all match. Characters around the outer tokens are ignored.
+//
+// The looser form must stand alone: no letter or digit may touch either end.
+// Without that, tokens that are short or common join across punctuation inside
+// longer words ("tab.cdefg" for the term "ab cdef"), which is noise. The exact
+// substring keeps matching inside longer words, as it always did.
+export function literalRegExp(literal) {
+  const tokens = [...literal.matchAll(/[\p{L}\p{N}]+/gu)];
+  if (tokens.length < 2) return new RegExp(escapeRe(literal), 'gi');
+  let loose = tokens[0][0];
+  for (let i = 1; i < tokens.length; i++) {
+    const own = tokens[i].index - (tokens[i - 1].index + tokens[i - 1][0].length);
+    loose += `[^\\p{L}\\p{N}]{0,${Math.max(MAX_GAP, own)}}${tokens[i][0]}`;
+  }
+  return new RegExp(`${escapeRe(literal)}|(?<![\\p{L}\\p{N}])${loose}(?![\\p{L}\\p{N}])`, 'giu');
+}
+
+// Terms file format: one term per line, matched case-insensitively. A term of
+// one alphanumeric token is a substring; a term of several also matches with
+// other separators or none between its tokens (see literalRegExp). Lines
 // starting with "re:" are JavaScript regular expressions (also
-// case-insensitive). Blank lines and lines starting with "#" are ignored.
+// case-insensitive) and are used as written. Blank lines and lines starting
+// with "#" are ignored.
 export function parseTerms(text, label = 'terms.txt') {
   const terms = [];
   text.split(/\r?\n/).forEach((rawLine, i) => {
@@ -36,7 +68,7 @@ export function parseTerms(text, label = 'terms.txt') {
       if (re.test('')) throw new GuardError(`${label} line ${line}: regular expression matches empty text`);
       re.lastIndex = 0;
     } else {
-      re = new RegExp(escapeRe(s), 'gi');
+      re = literalRegExp(s);
     }
     terms.push({ ordinal: terms.length + 1, line, re });
   });

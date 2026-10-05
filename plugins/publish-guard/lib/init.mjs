@@ -8,7 +8,9 @@ import { configPath, DEFAULT_EMAIL_PATTERNS } from './config.mjs';
 import { resolveFrom } from './util.mjs';
 
 const TERMS_TEMPLATE = `# publish-guard private terms. Never commit this file or paste it anywhere.
-# One term per line, matched case-insensitively as a substring.
+# One term per line, matched case-insensitively as a substring. A term of
+# several parts (acme-internal) also matches with other separators or none
+# between them (acme_internal, acme internal, acmeinternal).
 # Prefix a line with "re:" for a JavaScript regular expression.
 # Avoid generic words (they cause false positives); qualify them instead.
 #

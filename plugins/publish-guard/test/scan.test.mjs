@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
-import { BLOCK, excerpt, formatFinding, makeEmailPolicy, parseTerms, redact, Scanner } from '../lib/scan.mjs';
+import { BLOCK, excerpt, formatFinding, literalRegExp, makeEmailPolicy, parseTerms, redact, Scanner } from '../lib/scan.mjs';
 import { commit, containsTerm, git, makeRepo, ME, run, setup, TERMS, WORK } from './helpers.mjs';
 
 const terms = parseTerms(TERMS);
@@ -181,4 +181,100 @@ test('CLI scan of staged changes, ranges and commit message files', () => {
   const trailer = run(['scan', '--commit-msg-file', msg], { env, cwd: dir });
   assert.equal(trailer.code, 1);
   assert.match(trailer.stdout, /in a trailer is not allowed/);
+});
+
+// --- Multi-token terms: separators between tokens do not matter -------------
+
+const looseTerms = parseTerms(['# synthetic terms', '/Users/jdoe', 'acme corp', ''].join('\n'));
+const looseScanner = new Scanner({ terms: looseTerms });
+const FRAGMENT = /jdoe|acme/i;
+
+test('multi-token terms match slugs, underscores, dots, no separator and any case', () => {
+  const slugs = [
+    '/Users/jdoe/Projects/x',
+    '-Users-jdoe-Projects-x-',
+    'Users_jdoe',
+    'users.jdoe',
+    'usersjdoe',
+    'USERS--JDOE',
+    'C:\\Users\\JDoe\\x',
+  ];
+  for (const s of slugs) {
+    const f = looseScanner.text(s, 'text');
+    assert.equal(f.length, 1, s);
+    assert.equal(f[0].ordinal, 1, s);
+    assert.ok(!FRAGMENT.test(f[0].excerpt), f[0].excerpt);
+    assert.ok(!FRAGMENT.test(redact(s, looseTerms)), s);
+  }
+  for (const s of ['acme corp', 'Acme Corp', 'acme-corp', 'acme_corp', 'acme.corp', 'acmecorp', 'ACMECORP', '**acme** corp', 'acme: corp']) {
+    const f = looseScanner.text(s, 'text');
+    assert.equal(f.length, 1, s);
+    assert.equal(f[0].ordinal, 2, s);
+    assert.ok(!FRAGMENT.test(f[0].excerpt), f[0].excerpt);
+  }
+  assert.equal(redact('see -Users-jdoe-Projects-x-', looseTerms), `see -${BLOCK}-Projects-x-`);
+});
+
+test('the literal pattern for a term with a colon joins its tokens too', () => {
+  // "re:" opens a regular expression in a terms file, so this term is only
+  // reachable through the pattern builder.
+  const re = literalRegExp('re:acme');
+  for (const s of ['reacme', 're-acme', 'RE_ACME', 're:acme']) {
+    re.lastIndex = 0;
+    assert.ok(re.test(s), s);
+  }
+});
+
+test('a multi-token term still matches everything it matched as an exact string', () => {
+  const t = parseTerms('acme -- corp\nacme.corp/internal\n');
+  for (const s of ['acme -- corp', 'xACME -- CORPx', 'see acme.corp/internal now']) {
+    assert.ok(new Scanner({ terms: t }).text(s, 'text').length >= 1, s);
+  }
+});
+
+test('multi-token terms keep their reader-view matches (wrapped line, Unicode dash, invisible character)', () => {
+  const nbHyphen = String.fromCharCode(0x2011);
+  const zeroWidth = String.fromCharCode(0x200b);
+  for (const s of ['the acme\ncorp exporter', 'acme-\n  corp tools', `acme${nbHyphen}corp`, `Acme${zeroWidth}Corp`, 'users\n/jdoe']) {
+    const f = looseScanner.text(s, 'text');
+    assert.equal(f.length, 1, JSON.stringify(s));
+    assert.ok(!FRAGMENT.test(f[0].excerpt), f[0].excerpt);
+  }
+});
+
+test('multi-token terms do not match unrelated words, other orders or long separator runs', () => {
+  for (const s of ['acme and corp', 'corp acme', 'acme', 'corp', 'acme######corp', 'users and jdoe', 'jdoe users', 'ac me corp']) {
+    assert.equal(looseScanner.text(s, 'text').length, 0, s);
+  }
+});
+
+test('the looser forms must stand alone, while the exact text keeps matching inside longer words', () => {
+  // Short tokens joined across punctuation inside longer words are noise.
+  const short = new Scanner({ terms: parseTerms('ab cdef\n') });
+  for (const s of ['tab.cdefg', 'lab/cdef', 'ab.cdefs', 'xabcdefx', 'a-b-cdef']) assert.equal(short.text(s, 'text').length, 0, s);
+  for (const s of ['ab.cdef', 'see ab-cdef.', '(ab cdef)', 'AB_CDEF', 'abcdef', '-ab-cdef-']) assert.equal(short.text(s, 'text').length, 1, s);
+  // The text as written still counts anywhere, as before.
+  assert.equal(short.text('tab cdefg', 'text').length, 1);
+  for (const s of ['xacme corpx', 'x/Users/jdoex']) assert.equal(looseScanner.text(s, 'text').length, 1, s);
+  for (const s of ['xacme-corpx', 'myusersjdoe', 'acmecorpx']) assert.equal(looseScanner.text(s, 'text').length, 0, s);
+});
+
+test('single-token terms keep matching as plain case-insensitive substrings', () => {
+  const t = new Scanner({ terms: parseTerms('jdoe\nacmecorp\n@acme\n') });
+  for (const s of ['xJdoex', 'JDOE', 'path/jdoe/x']) assert.equal(t.text(s, 'text').filter((f) => f.ordinal === 1).length, 1, s);
+  // A single token does not start matching across words or punctuation.
+  for (const s of ['acme corp', 'acme-corp', 'acme.corp', 'ac-me-corp', 'j-doe', 'j.doe', 'acme']) {
+    assert.equal(t.text(s, 'text').length, 0, s);
+  }
+  // Punctuation in a single-token term is still part of the term.
+  assert.equal(t.text('mail @Acme now', 'text').length, 1);
+  assert.equal(t.text('mail Acme now', 'text').length, 0);
+});
+
+test('CLI scan reports a slugged private path without printing it', () => {
+  const { env } = setup({ terms: '# synthetic\n/Users/jdoe\n' });
+  const res = run(['scan', '--stdin'], { env, input: 'saved to -Users-jdoe-Projects-x-/notes.md\n' });
+  assert.equal(res.code, 1);
+  assert.match(res.stdout, /line 1: private term #1/);
+  assert.ok(!/jdoe/i.test(res.stdout + res.stderr), res.stdout);
 });
