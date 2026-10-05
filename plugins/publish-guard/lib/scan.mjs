@@ -247,7 +247,7 @@ const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\
 
 // Domains that never belong to a person (RFC 2606 / 6761 names), and
 // "domains" that are really file names such as icon@2x.png.
-const RESERVED_DOMAIN = /(^|\.)(example|test|invalid|localhost|local)$|^example\.(com|org|net)$/i;
+const RESERVED_DOMAIN = /(^|\.)(example|test|invalid|localhost|local)$|(^|\.)example\.(com|org|net)$/i;
 const FILE_TLD = new Set([
   'png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico', 'bmp', 'avif', 'js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx',
   'css', 'scss', 'less', 'json', 'md', 'html', 'htm', 'txt', 'yml', 'yaml', 'toml', 'lock', 'map', 'vue',
