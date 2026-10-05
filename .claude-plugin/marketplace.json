@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "quintinbotes",
-  "description": "Claude Code plugins by Quintin Botes: code review, debugging discipline, agent orchestration, and a guard against leaking private terms when publishing.",
+  "description": "Claude Code plugins by Quintin Botes: code review, debugging discipline, agent orchestration, governed codebase simplification, and a guard against leaking private terms when publishing.",
   "owner": {
     "name": "Quintin Botes",
     "url": "https://github.com/QuintinBotes"
@@ -46,6 +46,19 @@
       "homepage": "https://github.com/QuintinBotes/swarm",
       "repository": "https://github.com/QuintinBotes/swarm",
       "license": "MIT"
+    },
+    {
+      "name": "unknot",
+      "source": {
+        "source": "github",
+        "repo": "QuintinBotes/unknot"
+      },
+      "description": "Architecture-aware, incremental codebase simplification. Maps the code, data and infrastructure into a graph with provenance, finds accidental complexity, chooses decomposition patterns from measured evidence, and changes code only in small approved slices that a deterministic kernel verifies and can roll back.",
+      "category": "development",
+      "tags": ["refactoring", "architecture", "simplification", "modernization", "decomposition", "hooks"],
+      "homepage": "https://github.com/QuintinBotes/unknot",
+      "repository": "https://github.com/QuintinBotes/unknot",
+      "license": "Apache-2.0"
     },
     {
       "name": "publish-guard",
