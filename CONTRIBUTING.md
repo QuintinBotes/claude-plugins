@@ -24,8 +24,14 @@ Use this when the plugin has a runtime, tests, CI or releases of its own.
    If the plugin sits in a subdirectory of its repository, use
    `{ "source": "git-subdir", "url": "QuintinBotes/repo", "path": "plugins/my-plugin" }`.
 
-3. Leave `version` out of the entry. The plugin's own `plugin.json` wins at
-   install time, and two copies drift.
+3. Choose what users get. Without a `ref` they get the repository's default
+   branch. Add `"ref": "v1.2.0"` (a tag) or `"ref": "stable"` (a branch your
+   releases move) to either source to pin a release; the validator reads the
+   plugin at that ref.
+
+4. Leave `version` out of the entry. The plugin's own `plugin.json` wins at
+   install time, and two copies drift. For the same reason, copy the
+   description from `plugin.json` and change both together.
 
 The repository has to be public before the entry is useful to anyone else. A
 private repository installs only for people with read access to it.
@@ -36,8 +42,11 @@ Use this for skills and small plugins with no build step.
 
 1. Create `plugins/my-plugin/` with `.claude-plugin/plugin.json` and its
    components (`skills/`, `agents/`, `hooks/`, `commands/`).
-2. Run `claude plugin validate ./plugins/my-plugin`.
-3. Add an entry with `"source": "./plugins/my-plugin"`.
+2. Put tests in `plugins/my-plugin/test/*.test.mjs`; CI runs them with
+   `node --test`. Keep a `CHANGELOG.md`, and raise `version` in `plugin.json`
+   with every change users should receive.
+3. Run `claude plugin validate --strict ./plugins/my-plugin`.
+4. Add an entry with `"source": "./plugins/my-plugin"`.
 
 ## Before opening a pull request
 

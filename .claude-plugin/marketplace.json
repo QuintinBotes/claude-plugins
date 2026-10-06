@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "quintinbotes",
-  "description": "Claude Code plugins by Quintin Botes: code review, debugging discipline, agent orchestration, governed codebase simplification, and a guard against leaking private terms when publishing.",
+  "description": "Claude Code plugins by Quintin Botes: code review, debugging discipline, agent orchestration, autonomous engineering loops, governed codebase simplification, and a guard against leaking private terms when publishing.",
   "owner": {
     "name": "Quintin Botes",
     "url": "https://github.com/QuintinBotes"
@@ -79,7 +79,7 @@
     {
       "name": "publish-guard",
       "source": "./plugins/publish-guard",
-      "description": "Blocks commits, pushes, pull requests, issues and releases that would put private terms or a non-allowed email into repositories of protected GitHub owners. One scanner runs as a Claude Code hook, as git hooks and in CI.",
+      "description": "Blocks commits, pushes, pull requests, issues, releases and GitHub API calls that would put private terms or a non-allowed email into repositories of protected GitHub owners. One scanner runs as a Claude Code hook, as git hooks and in CI.",
       "category": "security",
       "tags": ["privacy", "hooks", "git", "github", "ci"],
       "homepage": "https://github.com/QuintinBotes/claude-plugins/tree/main/plugins/publish-guard",
