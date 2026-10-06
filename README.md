@@ -15,12 +15,12 @@ same, and `/plugin` lets you browse the catalog.
 
 | Plugin | What it does | Source |
 |---|---|---|
-| [review-voice](https://github.com/QuintinBotes/review-voice) | A concise, precedent-aware code reviewer. Every finding names a concrete failure mode in 40 words or fewer, ordered worst-first, evidence required, silence when nothing qualifies. | `QuintinBotes/review-voice`, `plugins/review-voice` |
+| [review-voice](https://github.com/QuintinBotes/review-voice) | A concise, precedent-aware code reviewer. Every finding names a concrete failure mode in 40 words or fewer, ordered worst-first, evidence required, silence when nothing qualifies. | `QuintinBotes/review-voice` (`plugins/review-voice/`) |
 | [circuit-breaker](https://github.com/QuintinBotes/circuit-breaker) | Investigation, mutation, refutation and verification as states a hook enforces, rather than instructions a model is asked to follow. | `QuintinBotes/circuit-breaker` |
 | [orbit](https://github.com/QuintinBotes/orbit) | An autonomous, evidence-driven engineering loop for Claude Code: contracts, isolated workers, independent verification, and recoverable unattended runs. | `QuintinBotes/orbit` (`plugin/`) |
 | [swarm](https://github.com/QuintinBotes/swarm) | Parallel agent orchestration: author a spec, decompose it into exclusive-ownership tasks, run them across isolated git worktrees, gate the merge on QA and review. | `QuintinBotes/swarm` |
 | [unknot](https://github.com/QuintinBotes/unknot) | Architecture-aware, incremental simplification: maps code, data and infrastructure, finds accidental complexity, picks decomposition patterns from measured evidence, and changes code only in small approved slices that a deterministic kernel verifies and can roll back. | `QuintinBotes/unknot` |
-| [publish-guard](plugins/publish-guard) | Keeps private terms and work emails out of commits, pushes, pull requests, issues and releases in repositories you own, with one scanner running as a Claude Code hook, as git hooks and in CI. | `plugins/publish-guard` |
+| [publish-guard](plugins/publish-guard) | Keeps private terms and work emails out of commits, pushes, pull requests, issues and releases in repositories you own, with one scanner running as a Claude Code hook, as git hooks and in CI. | this repository (`plugins/publish-guard/`) |
 
 ## How the catalog is laid out
 
@@ -33,9 +33,11 @@ Smaller plugins and standalone skills live in this repository under
 [`plugins/`](plugins/). See [CONTRIBUTING.md](CONTRIBUTING.md) for how to add
 either kind.
 
-Entries track each repository's default branch, so
-`claude plugin marketplace update quintinbotes` picks up whatever has been
-released there.
+An entry without a `ref` follows its repository's default branch, so
+`claude plugin marketplace update quintinbotes` picks up whatever has landed
+there. An entry with a `ref` is pinned to that tag or branch: orbit is pinned
+to `v0.1.0`. A plugin with its own marketplace can offer its latest work there
+and a released version here.
 
 ## Checks
 
