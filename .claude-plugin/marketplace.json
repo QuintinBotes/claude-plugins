@@ -35,6 +35,21 @@
       "license": "MIT"
     },
     {
+      "name": "orbit",
+      "source": {
+        "source": "git-subdir",
+        "url": "QuintinBotes/orbit",
+        "path": "plugin",
+        "ref": "v0.1.0"
+      },
+      "description": "An autonomous, evidence-driven engineering loop for Claude Code: contracts, isolated workers, independent verification, and recoverable unattended runs.",
+      "category": "development",
+      "tags": ["autonomous", "verification", "review", "sandbox", "state-machine"],
+      "homepage": "https://github.com/QuintinBotes/orbit",
+      "repository": "https://github.com/QuintinBotes/orbit",
+      "license": "MIT"
+    },
+    {
       "name": "swarm",
       "source": {
         "source": "github",
