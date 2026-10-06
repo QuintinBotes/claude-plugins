@@ -36,8 +36,9 @@ either kind.
 An entry without a `ref` follows its repository's default branch, so
 `claude plugin marketplace update quintinbotes` picks up whatever has landed
 there. An entry with a `ref` is pinned to that tag or branch: orbit is pinned
-to `v0.1.0`. A plugin with its own marketplace can offer its latest work there
-and a released version here.
+to `v0.1.0`, and unknot to its `stable` branch, which only its releases move.
+A plugin with its own marketplace can offer its latest work there and a
+released version here.
 
 ## Checks
 
