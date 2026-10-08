@@ -40,7 +40,7 @@
         "source": "git-subdir",
         "url": "QuintinBotes/orbit",
         "path": "plugin",
-        "ref": "v0.2.1"
+        "ref": "v0.2.2"
       },
       "description": "An autonomous, evidence-driven engineering loop for Claude Code: contracts, isolated workers, independent verification, and recoverable unattended runs.",
       "category": "development",
