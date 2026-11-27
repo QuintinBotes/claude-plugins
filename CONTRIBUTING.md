@@ -65,6 +65,21 @@ claude plugin install my-plugin@quintinbotes
 claude plugin details my-plugin
 ```
 
+## Commit identity
+
+Set `user.name` and `user.email` in your clone before committing. Without
+them git builds an address from the machine's hostname (`user@host.local`),
+and `guard / scan` fails the pull request on it.
+
+## Merging
+
+`main` requires one approving review, and its ruleset lets the repository
+owner bypass that. Merge once `guard / scan` and `validate` are green:
+
+```bash
+gh pr merge N --squash --admin --delete-branch
+```
+
 ## Renaming or removing a plugin
 
 Add the old name to `renames` in `marketplace.json` (or map it to `null` for a
