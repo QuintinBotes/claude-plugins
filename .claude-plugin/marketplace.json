@@ -77,6 +77,33 @@
       "license": "Apache-2.0"
     },
     {
+      "name": "memory",
+      "source": {
+        "source": "github",
+        "repo": "QuintinBotes/memory"
+      },
+      "description": "Local memory for Claude Code that never crosses organisations: a few cited items you approved, recalled within a fixed token budget.",
+      "category": "development",
+      "tags": ["memory", "context", "privacy", "local-first"],
+      "homepage": "https://github.com/QuintinBotes/memory",
+      "repository": "https://github.com/QuintinBotes/memory",
+      "license": "MIT"
+    },
+    {
+      "name": "proofmesh",
+      "source": {
+        "source": "git-subdir",
+        "url": "QuintinBotes/proofmesh",
+        "path": "packages/proofmesh-plugin"
+      },
+      "description": "Proofmesh for Claude Code: a local code graph that cites the file and line behind every fact. Find symbols, trace paths, measure impact, and verify absence claims before asserting them.",
+      "category": "development",
+      "tags": ["code-graph", "static-analysis", "impact-analysis", "local-first"],
+      "homepage": "https://github.com/QuintinBotes/proofmesh",
+      "repository": "https://github.com/QuintinBotes/proofmesh",
+      "license": "Apache-2.0"
+    },
+    {
       "name": "publish-guard",
       "source": "./plugins/publish-guard",
       "description": "Blocks commits, pushes, pull requests, issues, releases and GitHub API calls that would put private terms or a non-allowed email into repositories of protected GitHub owners. One scanner runs as a Claude Code hook, as git hooks and in CI.",
