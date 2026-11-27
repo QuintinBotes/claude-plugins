@@ -20,6 +20,8 @@ same, and `/plugin` lets you browse the catalog.
 | [orbit](https://github.com/QuintinBotes/orbit) | An autonomous, evidence-driven engineering loop for Claude Code: contracts, isolated workers, independent verification, and recoverable unattended runs. | `QuintinBotes/orbit` (`plugin/`) |
 | [swarm](https://github.com/QuintinBotes/swarm) | Parallel agent orchestration: author a spec, decompose it into exclusive-ownership tasks, run them across isolated git worktrees, gate the merge on QA and review. | `QuintinBotes/swarm` |
 | [unknot](https://github.com/QuintinBotes/unknot) | Architecture-aware, incremental simplification: maps code, data and infrastructure, finds accidental complexity, picks decomposition patterns from measured evidence, and changes code only in small approved slices that a deterministic kernel verifies and can roll back. | `QuintinBotes/unknot` |
+| [memory](https://github.com/QuintinBotes/memory) | Local memory that never crosses organisations: a few cited items you approved, recalled within a fixed token budget. | `QuintinBotes/memory` |
+| [proofmesh](https://github.com/QuintinBotes/proofmesh) | A local code graph that cites the file and line behind every fact. Find symbols, trace paths, measure impact, and verify absence claims before asserting them. | `QuintinBotes/proofmesh` (`packages/proofmesh-plugin/`) |
 | [publish-guard](plugins/publish-guard) | Keeps private terms and work emails out of commits, pushes, pull requests, issues and releases in repositories you own, with one scanner running as a Claude Code hook, as git hooks and in CI. | this repository (`plugins/publish-guard/`) |
 
 ## How the catalog is laid out
